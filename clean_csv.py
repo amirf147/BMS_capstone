@@ -4,7 +4,7 @@
 # Put each line of csv into list
 #a_file = open("discharge_2cells.csv", "r")
 
-file_name = input("Enter the file name with the .csv at the end: ")
+file_name = 'datalogs\\raw\\' + input('Enter the file name with .csv at the end: ')
 a_file = open(file_name, "r")
 lines = a_file.readlines()
 a_file.close()
@@ -49,7 +49,8 @@ for line_num in range(len(divided_lines)):
 
 
 # Write the list to a new file
-new_file_name = input("Enter a name for your new csv file followed by .csv: ")
+new_file_name = 'datalogs\\cleaned\\' + input(
+                "Enter a name for your new csv file followed by .csv: ")
 f = open(new_file_name, "a")
 f.write(column_names) # add the column names to the first line of file
 
