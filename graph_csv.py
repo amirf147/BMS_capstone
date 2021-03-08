@@ -1,4 +1,3 @@
-import pandas as pd
 from settings import Dataframe
 from settings import Plot
 
@@ -16,4 +15,3 @@ graph_6cells = Plot('Cell Voltages: Discharge on Cell 3 & Cell 5',
 
 # Apply plot setting and show plot
 graph_6cells.set_options(df, show_plot = True) 
-

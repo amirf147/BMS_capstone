@@ -4,8 +4,6 @@ import matplotlib.pyplot as plt
 if __name__ == "__main__":
     print("I prefer to be a module.")
 
-
-
 class Csv:
 
     rawfiles_path = 'datalogs\\raw\\'
@@ -135,8 +133,3 @@ class Plot:
         #plt.grid(color = 'black', linestyle = '-.', linewidth = 0.7)
         if show_plot:
             plt.show()
-
-
-
-
-
