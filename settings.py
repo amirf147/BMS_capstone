@@ -4,6 +4,22 @@ import matplotlib.pyplot as plt
 if __name__ == "__main__":
     print("I prefer to be a module.")
 
+class Csv:
+
+    path = 'datalogs\\raw\\'
+    column_names = []
+    
+    def __init__(self, file_name):
+        self.file_name = file_name
+
+    def to_lines(self):
+        a_file = open(self.path + self.file_name, "r")
+        lines = a_file.readlines()
+        a_file.close()
+        self.column_names = lines[4] # holds the column names of the table
+        lines = lines[6:-4] # remove first six lines and last 4 lines w/ no data
+        return lines
+    
 class Dataframe:
 
     def __init__(self, file_name, row_interval):
@@ -44,6 +60,8 @@ class Plot:
         #plt.grid(color = 'black', linestyle = '-.', linewidth = 0.7)
         if show_plot:
             plt.show()
+
+test_csv = Csv('test_data.csv')
 
 discharge_data = Dataframe('discharge_2cells_clean.csv', 400)
 
