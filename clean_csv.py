@@ -3,12 +3,35 @@
 
 from settings import Csv
 
-# Choose file to be converted from csv to pandas data_frame
-dc_csv = Csv('discharge_2cells.csv')
+### Choose file to be converted from csv to pandas data_frame
+##
+##dc_csv = Csv('discharge_2cells.csv')
+##
+##lines = dc_csv.to_lines() # split csv into list of lines
+##
+##divided_lines = dc_csv.to_chars(lines) # split lines into lines of chars
+##
+##fixed_lines = dc_csv.fix_decimals(divided_lines) # change decimals to be '.'
+##
+##dc_csv.write_to_file(fixed_lines) #create new cleaned file
 
-lines = dc_csv.to_lines() # split csv into list of lines
-divided_lines = dc_csv.to_chars(lines) # split lines into lines of chars
-fixed_lines = dc_csv.fix_decimals(divided_lines) # change decimals to be '.'
+##cardata = Csv('5cell_fullspeed.csv')
+##
+##lines = cardata.to_lines() # split csv into list of lines
+##
+##divided_lines = cardata.to_chars(lines) # split lines into lines of chars
+##
+##fixed_lines = cardata.fix_decimals(divided_lines) # change decimals to be '.'
+##
+##cardata.write_to_file(fixed_lines) #create new cleaned file
 
-dc_csv.write_to_file(fixed_lines) #create new cleaned file
+burstdata = Csv('continuous_steering_busts.csv')
+
+lines = burstdata.to_lines() # split csv into list of lines
+
+divided_lines = burstdata.to_chars(lines) # split lines into lines of chars
+
+fixed_lines = burstdata.fix_decimals(divided_lines) # change decimals to be '.'
+
+burstdata.write_to_file(fixed_lines) #create new cleaned file
 

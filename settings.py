@@ -99,10 +99,13 @@ class Dataframe:
     
         if hms == 'h':
             A, B, C = 1, 1 / 60, 1 / 3600
+            column_title = 'Time (hours)'
         elif hms == 'm':
             A, B, C = 60 , 1, 1 / 60
+            column_title = 'Time (minutes)'
         elif hms == 's':
             A, B, C = 3600, 60, 1
+            column_title = 'Time (seconds)'
         else:
             return 'Error: hms should be string "h" or "m" or "s"'
     
@@ -114,7 +117,7 @@ class Dataframe:
             times_list[row_number] = (hours * A) + (minutes * B) + (seconds * C)
 
         hours_column = pd.Series(times_list)
-        data_frame.insert(loc = 0, column = 'Time (hours)', value = hours_column)
+        data_frame.insert(loc = 0, column = column_title, value = hours_column)
 
 class Plot:
 
@@ -123,13 +126,15 @@ class Plot:
         self.x_values = x_values
         self.y_values = y_values
 
-    def set_options(self, df, n = 10, show_plot = False):
+    def set_options(self, df, nx = 20, ny = 20, show_plot = False):
         df.plot(x = self.x_values, y = self.y_values)
         plt.title(self.title)
         plt.ylabel('Voltage (V)')
         ax = plt.axes()
-        ax.xaxis.set_major_locator(plt.MaxNLocator(n))
+        ax.xaxis.set_major_locator(plt.MaxNLocator(nx))
+        ax.yaxis.set_major_locator(plt.MaxNLocator(ny))
         plt.minorticks_on()
-        #plt.grid(color = 'black', linestyle = '-.', linewidth = 0.7)
+        plt.grid(axis = 'both', which='both', color = 'gainsboro',
+                 linestyle = '-', linewidth = 0.7)
         if show_plot:
             plt.show()
