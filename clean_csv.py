@@ -25,13 +25,45 @@ from settings import Csv
 ##
 ##cardata.write_to_file(fixed_lines) #create new cleaned file
 
-burstdata = Csv('continuous_steering_busts.csv')
+##burstdata = Csv('continuous_steering_busts.csv')
+##
+##lines = burstdata.to_lines() # split csv into list of lines
+##
+##divided_lines = burstdata.to_chars(lines) # split lines into lines of chars
+##
+##fixed_lines = burstdata.fix_decimals(divided_lines) # change decimals to be '.'
+##
+##burstdata.write_to_file(fixed_lines) #create new cleaned file
 
-lines = burstdata.to_lines() # split csv into list of lines
+##chargedata = Csv('charging.csv')
+##
+##lines = chargedata.to_lines() # split csv into list of lines
+##
+##divided_lines = chargedata.to_chars(lines) # split lines into lines of chars
+##
+##fixed_lines = chargedata.fix_decimals(divided_lines) # change decimals to be '.'
+##
+##chargedata.write_to_file(fixed_lines) #create new cleaned file
 
-divided_lines = burstdata.to_chars(lines) # split lines into lines of chars
+##data4x2_1 = Csv('4x2_fullspeed.csv')
+##
+##lines = data4x2_1.to_lines() # split csv into list of lines
+##
+##divided_lines = data4x2_1.to_chars(lines) # split lines into lines of chars
+##
+##fixed_lines = data4x2_1.fix_decimals(divided_lines) # change decimals to be '.'
+##
+##data4x2_1.write_to_file(fixed_lines) #create new cleaned file
+##
 
-fixed_lines = burstdata.fix_decimals(divided_lines) # change decimals to be '.'
+data4x2_1 = Csv('4x2_fullspeed+steering.csv')
 
-burstdata.write_to_file(fixed_lines) #create new cleaned file
+lines = data4x2_1.to_lines() # split csv into list of lines
+
+divided_lines = data4x2_1.to_chars(lines) # split lines into lines of chars
+
+fixed_lines = data4x2_1.fix_decimals(divided_lines) # change decimals to be '.'
+
+data4x2_1.write_to_file(fixed_lines) #create new cleaned file
+
 

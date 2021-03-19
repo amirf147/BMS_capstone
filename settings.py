@@ -71,17 +71,12 @@ class Csv:
             
 class Dataframe:
 
-    def __init__(self, file_name, row_interval):
+    def __init__(self, file_name, row_interval = 1):
         self.file_name = 'datalogs\\cleaned\\' + file_name
         self.row_interval = row_interval
 
     def clean(self):
         df = pd.read_csv(self.file_name)
-        df = df.drop([' Data  ',' ADC     ',' StartCells',' OpenWire',
-              ' Discharge',' StartAux   ',' StartStatus',' BRD#01 ADDR ',
-              ' CELL07',' CELL08',' CELL09',' CELL10',' CELL11',' CELL12',
-              ' GPIO1',' GPIO2',' GPIO3',' GPIO4',' GPIO5',' VREF2',' VREGA ',
-              ' VREGD ', ' ITMP  '], axis = 1)
         df = df.rename(columns = {'Elapsed Time   ': 'Elapsed Time',
                           ' CELL01': 'Cell 1', ' CELL02': 'Cell 2',
                           ' CELL03': 'Cell 3', ' CELL04': 'Cell 4',
