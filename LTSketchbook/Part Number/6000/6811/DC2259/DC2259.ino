@@ -68,6 +68,10 @@ In this sketch book:
    via the LTC6820 by initiating a dummy SPI communication. It is defined in LTC681x.cpp  
 *******************************************************************************************/
 
+/*Additions by Amir*/
+#include <SoftwareSerial.h>
+SoftwareSerial mySerial(2, 3); // RX, TX
+
 /************************* Includes ***************************/
 #include <Arduino.h>
 #include <stdint.h>
@@ -79,7 +83,6 @@ In this sketch book:
 #include "UserInterface.h"   
 #include "LTC681x.h"
 #include "LTC6811.h"
-
 /************************* Defines *****************************/
 #define ENABLED 1
 #define DISABLED 0
@@ -176,6 +179,7 @@ bool DCTOBITS[4] = {true, false, true, false}; //!< Discharge time value // Dcto
  ***********************************************************************/
 void setup()
 {
+  mySerial.begin(115200);
   Serial.begin(115200);
   quikeval_SPI_connect();
   spi_enable(SPI_CLOCK_DIV16); // This will set the Linduino to have a 1MHz Clock
@@ -195,6 +199,8 @@ void setup()
 ***********************************************************************/
 void loop()
 {
+  /*Addition by Amir*/
+  mySerial.listen();
   if (Serial.available())           // Check for user input
   {
     uint32_t user_command;
@@ -224,6 +230,15 @@ void run_command(uint32_t cmd)
   
   switch (cmd)
   {
+    case 808:
+      if (mySerial.available()>0)  
+        mySerial.write('AT');
+        delay(2000);
+        if(Serial.available())
+          Serial.println(mySerial.read());
+          delay(2000);
+      break;
+        
     case 1: // Write and Read Configuration Register
       wakeup_sleep(TOTAL_IC);
       LTC6811_wrcfg(TOTAL_IC,BMS_IC); // Write into Configuration Register
