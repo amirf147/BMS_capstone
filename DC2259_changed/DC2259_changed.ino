@@ -70,7 +70,7 @@ In this sketch book:
 
 
 #include <SoftwareSerial.h>
-SoftwareSerial mySerial(2, 3); // RX, TX
+SoftwareSerial sim808serial(2, 3); // RX, TX
 
 /************************* Includes ***************************/
 #include <Arduino.h>
@@ -118,6 +118,8 @@ void serial_print_hex(uint8_t data);
 char read_hex(void);   
 char get_char(void);
 
+void string_millis(unsigned int totalmillis);
+
 /*******************************************************************
   Setup Variables
   The following variables can be modified to configure the software.
@@ -159,6 +161,13 @@ const uint8_t PRINT_PEC = DISABLED; //!< This is to ENABLED or DISABLED printing
  on the number of ICs on the stack
  ******************************************************/
 cell_asic BMS_IC[TOTAL_IC]; //!< Global Battery Variable
+unsigned long timebefore = 0; //Global time variable
+unsigned int totalmillis = 0;
+unsigned int totalsecond = 0;
+unsigned int totalminute = 0;
+String milli;
+String secs;
+String mins;
 
 /*********************************************************
  Set the configuration bits. 
@@ -179,21 +188,9 @@ bool DCTOBITS[4] = {true, false, true, false}; //!< Discharge time value // Dcto
  ***********************************************************************/
 void setup()
 {
-  mySerial.begin(115200);
+  sim808serial.begin(115200);
   int counter = 0;
-//  delay(2000);
-//  mySerial.println("AT");
-//  delay(200);
-//  mySerial.println("AT+BTPOWER=1");
-//  delay(200);
-//  //mySerial.println("AT+BTSCAN=1,10");
-//  //delay(1000);
-//  mySerial.println("AT+BTGETPROF=2");
-//  delay(200);
-//  mySerial.println("AT+BTCONNECT=2,4");
-//  delay(5000);
-  mySerial.listen();
-//  Serial.begin(115200);
+  sim808serial.listen(); //listen for incoming data to sim808
   Serial.begin(115200);
   quikeval_SPI_connect();
   spi_enable(SPI_CLOCK_DIV16); // This will set the Linduino to have a 1MHz Clock
@@ -249,57 +246,11 @@ void run_command(uint32_t cmd)
     case 808:
       while(1)
       { 
-        while(mySerial.available() > 0)
-          Serial.write(mySerial.read());
+        while(sim808serial.available() > 0)
+          Serial.write(sim808serial.read());
         while(Serial.available())
-          mySerial.write(Serial.read());  //Arduino send the sim808 feedback to computer
-          Serial.println(counter++);
-          delay(1000);
-          if (counter == 100)
-            break;
-            counter = 0;
+          sim808serial.write(Serial.read());  //Arduino send the sim808 feedback to computer
       }
-
-//    case 888:
-//      mySerial.println("AT+BTSPPSEND=1");
-//      delay(200); 
-//        while(mySerial.available() > 0)
-//          Serial.write(mySerial.read());
-//          Serial.println("1st");
-//          delay(1000);
-//        while(Serial.available())
-//          mySerial.write(Serial.read());  //Arduino send the sim808 feedback to computer
-//          Serial.println("2nd");
-//          delay(1000);
-//          Serial.println(counter++);
-//          delay(1000);
-//          if (counter == 10)
-//            break;
-//            //counter = 0;
-//      }
-        
-        
-        
-        //while(1)
-//        { 
-//          while(mySerial.available() > 0)
-//            Serial.write(mySerial.read());
-//          while(Serial.available())
-//            mySerial.write(Serial.read());  //Arduino send the sim808 feedback to computer
-//            Serial.println(counter++);
-//            delay(1000);
-//            if (counter == 60)
-//              break;
-//        }
-
-        
-//      while(mySerial.available() > 0)
-//        Serial.write(mySerial.read());
-//      while(Serial.available())
-//        mySerial.write("AT+BTSPPSEND=1");
-//        delay(5000);
-      
- 
         
     case 1: // Write and Read Configuration Register
       wakeup_sleep(TOTAL_IC);
@@ -740,9 +691,10 @@ void measurement_loop(uint8_t datalog_en)
   char input = 0;
   
   Serial.println(F("Transmit 'm' to quit"));
+
   
   while (input != 'm')
-  {
+  {  
      if (Serial.available() > 0)
       {
         input = read_char();
@@ -770,13 +722,7 @@ void measurement_loop(uint8_t datalog_en)
       wakeup_idle(TOTAL_IC);
       error = LTC6811_rdcv(SEL_ALL_REG, TOTAL_IC,BMS_IC);
       check_error(error);
-//      //SPP data send
-//      mySerial.println("AT+BTSPPSEND=10");
-//      delay(500);
       print_cells(datalog_en);
-//      mySerial.write(Serial.read());
-//      delay(500);
-//      break;
     }
   
     if (MEASURE_AUX == ENABLED)
@@ -805,7 +751,7 @@ void measurement_loop(uint8_t datalog_en)
     {
       print_pec_error_count();
     }
-
+    timebefore = millis(); //time before next measurement
     delay(MEASUREMENT_LOOP_TIME);
   }
 }
@@ -914,33 +860,69 @@ void print_cells(uint8_t datalog_en)
     }
     else
     {
-      
-      
       //SPP SEND
-      mySerial.println("AT+BTSPPSEND=300");
-      delay(200);
-      if (mySerial.available() > 1)
-        mySerial.read();
-
+      String datastream = ""; //will hold the cell measurements in 1 line
+      unsigned long timeafter; //gets value after measurement taken
+      unsigned int timepassed; //will hold time between measurements
+      
+      
+      sim808serial.println("AT+BTSPPSEND=110"); //datastream will be 110 in length before sending
       Serial.print(" Cells :");
-      mySerial.println(" Cells :");
+      datastream += "Cells,";
       
       for (int i=0; i<BMS_IC[0].ic_reg.cell_channels; i++)
       {
         Serial.print(BMS_IC[current_ic].cells.c_codes[i]*0.0001,4);
-        Serial.print(",");
-        
-        mySerial.println(BMS_IC[current_ic].cells.c_codes[i]*0.0001,4);
-        mySerial.println(",");
-        delay(200);
-        if (mySerial.available() > 1)
-          mySerial.read();
-          delay(500);
+        Serial.print(",");      
+        datastream += String(BMS_IC[current_ic].cells.c_codes[i]*0.0001,4);
+        datastream += ",";
       }
+
+      timeafter = millis();
+      if (timebefore == 0) { //first measurement, no need to consider timeafter
+        timepassed = 0;
+        milli = "000";
+      }
+      else
+      {
+        timepassed = timeafter - timebefore;
+        totalmillis += timepassed;  
+        string_millis(totalmillis);
+      }
+      datastream = ",Milliseconds," + milli + "," + datastream;
+      sim808serial.println(datastream);
+      
+      if (sim808serial.available() > 1)
+          sim808serial.read();
     }
   }
   Serial.println("\n");
 }
+
+
+void string_millis(unsigned int totalmillis_) { //parameter name can not be same as the global
+                                                //variable because then it becomes local to function
+                                                //and doesn't change the global one anymore
+    
+    if (totalmillis_ >= 1000) {
+      totalsecond += 1;
+      totalmillis = totalmillis - 1000;  
+    }
+    if (totalmillis == 0) {
+      milli = "000";
+    }
+    else if (totalmillis > 99 && totalmillis < 1000) {
+      milli = String(totalmillis);
+    } 
+    else if (totalmillis > 9 && totalmillis <= 99) {
+      milli = "0" + String(totalmillis);
+    }
+    else if (totalmillis <= 9 && totalmillis > 0) {
+      milli = "00" + String(totalmillis);
+    }   
+}
+
+
 
 /*!****************************************************************************
   \brief Prints GPIO voltage codes and Vref2 voltage code onto the serial port
