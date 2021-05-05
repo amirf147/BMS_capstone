@@ -738,7 +738,6 @@ void measurement_loop(uint8_t datalog_en)
     {
       print_pec_error_count();
     }
-    timebefore = millis(); //time before next measurement
     delay(MEASUREMENT_LOOP_TIME);
   }
 }
@@ -851,8 +850,6 @@ void print_cells(uint8_t datalog_en)
       String datastream = ""; //will hold the cell measurements in 1 line
       sim808serial.println("AT+BTSPPSEND=86"); //datastream will be 86 in length before sending
       Serial.print(" Cells :");
-      //datastream += "Cells,";
-      
       for (int i=0; i<BMS_IC[0].ic_reg.cell_channels; i++)
       {
         Serial.print(BMS_IC[current_ic].cells.c_codes[i]*0.0001,4);
