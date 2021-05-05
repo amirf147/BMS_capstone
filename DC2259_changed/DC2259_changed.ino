@@ -43,7 +43,7 @@
 *    on or directly connected to an Analog Devices Inc. component.
 *
 * THIS SOFTWARE IS PROVIDED BY ANALOG DEVICES "AS IS" AND ANY EXPRESS OR
-* IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, NON-INFRINGEMENT,
+* IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, NON-sppINFRINGEMENT,
 * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
 * IN NO EVENT SHALL ANALOG DEVICES BE LIABLE FOR ANY DIRECT, INDIRECT,
 * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
@@ -67,7 +67,6 @@ In this sketch book:
   -The Function wakeup_idle(TOTAL_IC) : is used to wake the ICs connected in daisy chain 
    via the LTC6820 by initiating a dummy SPI communication. It is defined in LTC681x.cpp  
 *******************************************************************************************/
-
 
 #include <SoftwareSerial.h>
 SoftwareSerial sim808serial(2, 3); // RX, TX
@@ -118,8 +117,6 @@ void serial_print_hex(uint8_t data);
 char read_hex(void);   
 char get_char(void);
 
-void string_millis(unsigned int totalmillis);
-
 /*******************************************************************
   Setup Variables
   The following variables can be modified to configure the software.
@@ -161,13 +158,6 @@ const uint8_t PRINT_PEC = DISABLED; //!< This is to ENABLED or DISABLED printing
  on the number of ICs on the stack
  ******************************************************/
 cell_asic BMS_IC[TOTAL_IC]; //!< Global Battery Variable
-unsigned long timebefore = 0; //Global time variable
-unsigned int totalmillis = 0;
-unsigned int totalsecond = 0;
-unsigned int totalminute = 0;
-String milli;
-String secs;
-String mins;
 
 /*********************************************************
  Set the configuration bits. 
@@ -189,7 +179,6 @@ bool DCTOBITS[4] = {true, false, true, false}; //!< Discharge time value // Dcto
 void setup()
 {
   sim808serial.begin(115200);
-  int counter = 0;
   sim808serial.listen(); //listen for incoming data to sim808
   Serial.begin(115200);
   quikeval_SPI_connect();
@@ -240,9 +229,7 @@ void run_command(uint32_t cmd)
   int8_t s_pin_read=0;
   
   switch (cmd)
-  {
-    
-    
+  {  
     case 808:
       while(1)
       { 
@@ -862,13 +849,9 @@ void print_cells(uint8_t datalog_en)
     {
       //SPP SEND
       String datastream = ""; //will hold the cell measurements in 1 line
-      unsigned long timeafter; //gets value after measurement taken
-      unsigned int timepassed; //will hold time between measurements
-      
-      
-      sim808serial.println("AT+BTSPPSEND=110"); //datastream will be 110 in length before sending
+      sim808serial.println("AT+BTSPPSEND=86"); //datastream will be 86 in length before sending
       Serial.print(" Cells :");
-      datastream += "Cells,";
+      //datastream += "Cells,";
       
       for (int i=0; i<BMS_IC[0].ic_reg.cell_channels; i++)
       {
@@ -878,18 +861,6 @@ void print_cells(uint8_t datalog_en)
         datastream += ",";
       }
 
-      timeafter = millis();
-      if (timebefore == 0) { //first measurement, no need to consider timeafter
-        timepassed = 0;
-        milli = "000";
-      }
-      else
-      {
-        timepassed = timeafter - timebefore;
-        totalmillis += timepassed;  
-        string_millis(totalmillis);
-      }
-      datastream = ",Milliseconds," + milli + "," + datastream;
       sim808serial.println(datastream);
       
       if (sim808serial.available() > 1)
@@ -898,32 +869,6 @@ void print_cells(uint8_t datalog_en)
   }
   Serial.println("\n");
 }
-
-
-void string_millis(unsigned int totalmillis_) { //parameter name can not be same as the global
-                                                //variable because then it becomes local to function
-                                                //and doesn't change the global one anymore
-    
-    if (totalmillis_ >= 1000) {
-      totalsecond += 1;
-      totalmillis = totalmillis - 1000;  
-    }
-    if (totalmillis == 0) {
-      milli = "000";
-    }
-    else if (totalmillis > 99 && totalmillis < 1000) {
-      milli = String(totalmillis);
-    } 
-    else if (totalmillis > 9 && totalmillis <= 99) {
-      milli = "0" + String(totalmillis);
-    }
-    else if (totalmillis <= 9 && totalmillis > 0) {
-      milli = "00" + String(totalmillis);
-    }   
-}
-
-
-
 /*!****************************************************************************
   \brief Prints GPIO voltage codes and Vref2 voltage code onto the serial port
  @return void
